@@ -1,0 +1,9 @@
+:global currentIP;
+ 
+:local newIP [/ipv6 address get [find from-pool=ipv6 interface="30-LAN-DHCP"] address];
+ 
+:if ($newIP != $currentIP) do={
+    :put "ip address $currentIP changed to $newIP";
+    :set currentIP $newIP;
+    /log info "New IPv6 Prefix is $currentIP";
+}
