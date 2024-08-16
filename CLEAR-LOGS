@@ -1,0 +1,5 @@
+Clear logs RouterOSv7
+
+
+system/logging/action/set numbers=0 memory-lines=1
+system/logging/action/set numbers=0 memory-lines=1000
