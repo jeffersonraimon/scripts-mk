@@ -1,0 +1,39 @@
+To Change AAAA DDNS Cloudflare for RouterOSv7
+
+
+
+:global currentIP;
+ 
+:local wanInterface "10-SERVERS"
+
+:local newIpCidr [/ipv6 address get [find from-pool=ipv6 interface="$wanInterface"] address];
+:local newIP [:pick $newIpCidr 0 [:find $newIpCidr "/"]]
+ 
+
+:if ($newIP != $currentIP) do={
+    :put "ip address $currentIP changed to $newIP";
+    :set currentIP $newIP;
+    /log info "New IPv6 Prefix to interface SERVERS is $currentIP";
+
+    :local cfToken "LBuQWXXXXXXXXCwCOqXXXXXXXX3qF7HHaVf8R"
+    :local cfZoneId "7ce377aXXXX6efXXXXXXX756978530a"
+    :local cfDnsId "193c4a282aXXXX16XXXXXXXd7689d7"
+    :local dnsType "AAAA"
+    :local dnsName "XXXXX.XXXXXXX.XXX"
+    :local dnsTTL "1"
+    :local dnsProxied "false"
+    :local apiUrl "https://api.cloudflare.com/client/v4/zones/$cfZoneId/dns_records/$cfDnsId"
+    :log info "$apiUrl"
+    :local headers "Authorization: Bearer $cfToken"
+    :local payload "{\"type\":\"$dnsType\",\"name\":\"$dnsName\",\"content\":\"$newIP\",\"ttl\":$dnsTTL,\"proxied\":$dnsProxied}"
+    :log info "$headers"
+    :log info "$payload"
+    :log info "$response"
+    :do {
+    :local response [/tool fetch http-method=put url=$apiUrl http-header-field=$headers http-data=$payload as-value output=user]
+
+}
+
+}
+
+
