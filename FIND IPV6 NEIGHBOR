@@ -1,0 +1,8 @@
+:local targetMAC "BC:10:14:9C:23:8D"
+:local neighborAddress
+
+:foreach neighbor in=[/ipv6 neighbor find mac-address=$targetMAC] do={
+  :local neighborInfo [/ipv6 neighbor get $neighbor]
+  :set neighborAddress [:pick $neighborInfo 0 39]
+  :log info "$neighborAddress"
+}
