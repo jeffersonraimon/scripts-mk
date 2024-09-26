@@ -1,0 +1,32 @@
+/interface list add name=WAN
+/interface list add name=WIFI
+
+/interface list member add interface=PPPOE-CLIENT list=WAN
+/interface list member add interface=20-DECO-WIFI-DHCP list=WIFI
+
+/ip firewall filter add action=fasttrack-connection chain=forward comment=FASTTRACK connection-state=established,related hw-offload=yes in-interface-list=WAN out-interface-list=!WIFI
+
+/ip firewall address-list add address=45.7.36.0/22 list=LOL
+/ip firewall address-list add address=45.7.39.0/24 list=LOL
+/ip firewall address-list add address=45.7.37.0/24 list=LOL
+/ip firewall address-list add address=45.7.38.0/24 list=LOL
+
+
+/ip firewall mangle add action=mark-packet chain=forward dst-address-list=LOL in-interface-list=WIFI new-packet-mark=LOL-INGAME passthrough=yes comment="LOL WILD RIFT"
+
+
+/queue tree add limit-at=2M max-limit=2M name=queue1 packet-mark=LOL-INGAME parent=global queue=fq_codelx comment="LOL"
+
+
+
+ACTIVATE
+ip firewall/filter/set [find comment=FASTTRACK] in-interface-list=WAN out-interface-list=!WIFI
+ip firewall/mangle/set [find comment="LOL WILD RIFT"] disabled=no
+queue/tree/set [find comment=LOL] disabled=no
+
+DEACTIVATE (MAKE OTHER SCRIPT)
+
+ip firewall/filter/unset [find comment=FASTTRACK] in-interface-list
+ip firewall/filter/unset [find comment=FASTTRACK] out-interface-list
+ip firewall/mangle/set [find comment="LOL WILD RIFT"] disabled=yes
+queue/tree/set [find comment=LOL] disabled=yes
