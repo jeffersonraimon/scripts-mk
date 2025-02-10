@@ -1,0 +1,35 @@
+:log warning "***************************************"
+# Conexão FTP
+:global host 10.1.10.XX
+:global usuario AAAAA
+:global senha BBBBB
+:global diretorio /
+# Pega o nome do Router
+:global identifica [/system identity get value-name=name ];
+# Gera data no formato AAAA-MM-DD
+:global data [/system clock get value-name=date]
+:global meses ("jan","feb","mar","apr","may","jun","jul","aug","sep","oct","nov","dec");
+:global ano ([:pick $data 7 11])
+:global mestxt ([:pick $data 0 3])
+:global mm ([ :find $meses $mestxt -1 ] + 1);
+:if ($mm < 10) do={ :set mm ("0" . $mm); }
+:global mes ([:pick $ds 7 11] . $mm . [:pick $ds 4 6])
+:global dia ([:pick $data 4 6])
+:log info "Gerando backup: $ano-$mes-$dia.$identifica.backup";
+/system backup save name="$ano-$mes-$dia.$identifica";
+:log info "Gerando export: $ano-$mes-$dia.$identifica.rsc";
+/export file="$ano-$mes-$dia.$identifica"
+:log info "Processando...";
+:delay 5s
+:log info "Conectando FTP Server...";
+:log info "Enviando Backup [$ano-$mes-$dia.$identifica.backup] ...";
+/tool fetch address=$host src-path="$ano-$mes-$dia.$identifica.backup" user="$usuario" password="$senha" port=21 upload=yes mode=ftp dst-path="$diretorio/$ano-$mes-$dia.$identifica.backup"
+:log info "Enviando Export [$ano-$mes-$dia.$identifica.rsc] ...";
+/tool fetch address=$host src-path="$ano-$mes-$dia.$identifica.rsc" user="$usuario" password="$senha" port=21 upload=yes mode=ftp dst-path="$diretorio/$ano-$mes-$dia.$identifica.rsc"
+:delay 1
+:log info "Backup enviado com sucesso...";
+:log info "Removendo arquivos...";
+ /file remove "$ano-$mes-$dia.$identifica.backup"
+ /file remove "$ano-$mes-$dia.$identifica.rsc"
+:log info "Rotina de backup finalizada...";
+:log warning "***************************************";
